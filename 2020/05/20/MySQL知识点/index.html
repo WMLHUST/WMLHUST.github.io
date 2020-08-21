@@ -260,9 +260,9 @@
 </li>
 <li>业务双写<br>存多份数据，但是拆分纬度不一样。一套按用户ID划分，一套按商户号划分。同样存在写入多个库的分布式事务问题。</li>
 <li>异步双写<br>还是多份数据，业务单写一份，然后通过监听binlog，同步到其他表上</li>
-<li>多个纬度统一到一个纬度<br>比如把订单ID和用户ID统一成一个维度，然后把用户ID作为订单ID的一部分。这样，订单ID中就包含了用户ID的信息，然后按照用户ID分库，当按订单ID查询的时候，提取出用户ID，再按用户ID查询。   </li>
+<li>多个纬度统一到一个纬度<br>比如把订单ID和用户ID统一成一个维度，然后把用户ID作为订单ID的一部分。这样，订单ID中就包含了用户ID的信息，然后按照用户ID分库，当按订单ID查询的时候，提取出用户ID，再按用户ID确定在那哪个库表中。   </li>
 </ol>
-<p><strong>总之就是，拆分依据的维度，要同时在多个原始ID中提现</strong></p>
+<p><strong>总之就是，拆分依据的维度，要同时在多个原始ID中体现</strong></p>
 <h2 id="分库分表后的Join问题"><a href="#分库分表后的Join问题" class="headerlink" title="分库分表后的Join问题"></a>分库分表后的Join问题</h2><ol>
 <li>join拆分为多个单表查询，在应用层代码里做join处理</li>
 <li>增加宽表，提前join好</li>
@@ -490,7 +490,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">33</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -503,7 +503,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

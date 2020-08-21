@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="此处安全非指SQL注入、XSS等web安全，而是指业务安全，比如权限、伪造参数等，包括但不限于http以及其他rpc协议的接口。举个栗子，很多业务春节活动都会发红包，那么有一个独立的发红包服务，如何分配、控制接口的权限等安全？如何应对发放失败问题？这里提供几个思路，欢迎一起探讨，欢迎指出错误。 1 https + client证书日常我们使用https，都是client校验server证书；实际上">
+<meta property="og:type" content="article">
+<meta property="og:title" content="谈一下接口安全">
+<meta property="og:url" content="http://yoursite.com/2020/08/14/%E8%B0%88%E4%B8%80%E4%B8%8B%E6%8E%A5%E5%8F%A3%E5%AE%89%E5%85%A8/index.html">
+<meta property="og:site_name" content="小本本">
+<meta property="og:description" content="此处安全非指SQL注入、XSS等web安全，而是指业务安全，比如权限、伪造参数等，包括但不限于http以及其他rpc协议的接口。举个栗子，很多业务春节活动都会发红包，那么有一个独立的发红包服务，如何分配、控制接口的权限等安全？如何应对发放失败问题？这里提供几个思路，欢迎一起探讨，欢迎指出错误。 1 https + client证书日常我们使用https，都是client校验server证书；实际上">
+<meta property="article:published_time" content="2020-08-14T02:35:20.000Z">
+<meta property="article:modified_time" content="2020-08-14T02:35:20.000Z">
+<meta property="article:author" content="WordGe">
+<meta property="article:tag" content="后台安全">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/08/14/%E8%B0%88%E4%B8%80%E4%B8%8B%E6%8E%A5%E5%8F%A3%E5%AE%89%E5%85%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>谈一下接口安全 | 小本本</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?048408dcae04570297e1804bd477cac3";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="小本本" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小本本</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">学而时习之，不亦说乎</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/14/%E8%B0%88%E4%B8%80%E4%B8%8B%E6%8E%A5%E5%8F%A3%E5%AE%89%E5%85%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          谈一下接口安全
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-14 10:35:20" itemprop="dateCreated datePublished" datetime="2020-08-14T10:35:20+08:00">2020-08-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">安全</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>此处安全非指SQL注入、XSS等web安全，而是指业务安全，比如权限、伪造参数等，包括但不限于http以及其他rpc协议的接口。<br>举个栗子，很多业务春节活动都会发红包，那么有一个独立的发红包服务，如何分配、控制接口的权限等安全？如何应对发放失败问题？这里提供几个思路，欢迎一起探讨，欢迎指出错误。</p>
+<h2 id="1-https-client证书"><a href="#1-https-client证书" class="headerlink" title="1 https + client证书"></a>1 https + client证书</h2><p>日常我们使用https，都是client校验server证书；实际上，也可以给用户分配client证书，以验证客户端身份。</p>
+<h3 id="1-1-优点"><a href="#1-1-优点" class="headerlink" title="1.1 优点"></a>1.1 优点</h3><p>可以有效保证server/client身份的真实性，只要client证书不泄露，就可保证client调用是正常的。</p>
+<h3 id="1-2-缺点"><a href="#1-2-缺点" class="headerlink" title="1.2 缺点"></a>1.2 缺点</h3><ol>
+<li>不支持http，性能没有http好</li>
+<li>若使用内网捕获的请求，直接重放，还是可以突破限制（很多时候是无意的，比如安全同事对接口的扫描；或测试环境的流量录制重放）</li>
+</ol>
+<h2 id="2-client-ip白名单"><a href="#2-client-ip白名单" class="headerlink" title="2 client ip白名单"></a>2 client ip白名单</h2><p>server只处理来自源ip在白名单内的请求。</p>
+<h3 id="2-1-优点"><a href="#2-1-优点" class="headerlink" title="2.1 优点"></a>2.1 优点</h3><ol>
+<li>一个大胆的想法，除非在client出口网关处，做tcp/ip包级别的解析伪造，其他情况可以保证安全。</li>
+<li>改造简单，甚至无需改造</li>
+</ol>
+<h3 id="2-2-缺点"><a href="#2-2-缺点" class="headerlink" title="2.2 缺点"></a>2.2 缺点</h3><ol>
+<li>未解决请求重放问题</li>
+<li>不适用于client ip经常发生变化的场景，比如ADSL拨号、服务自动扩容等</li>
+</ol>
+<h2 id="3-token-加密"><a href="#3-token-加密" class="headerlink" title="3 token 加密"></a>3 token 加密</h2><p>该token仅保存在client和server本地，不应该在请求里携带原始token，避免泄露。常见的是，用做加密或签名算法的key，。一般情况，用签名算法，比如md5(params+key)。加密算法，加密后的数据会特别长，影响性能。</p>
+<h3 id="3-1-优点"><a href="#3-1-优点" class="headerlink" title="3.1 优点"></a>3.1 优点</h3><p>实现简单、改造简单</p>
+<h3 id="3-2-缺点"><a href="#3-2-缺点" class="headerlink" title="3.2 缺点"></a>3.2 缺点</h3><p>未解决请求重放问题，可以用以下两种思路优化一下。</p>
+<h3 id="3-3-优化一：增加-随机数、时间戳-参数"><a href="#3-3-优化一：增加-随机数、时间戳-参数" class="headerlink" title="3.3 优化一：增加 随机数、时间戳 参数"></a>3.3 优化一：增加 随机数、时间戳 参数</h3><p>以md5(params+key)为例：  </p>
+<ol>
+<li>params增加<code>随机数</code>，使用redis检测是否重复。但不可能永久保存所有的随机数，随着累积，随机数冲突的概率会越来越大。因此需要给随机数增加时效性，比如半个小时过期。可解决半个小时内的重放问题。</li>
+<li>params增加<code>时间戳</code>，接口增加逻辑，检测时间戳是否在前后十分钟。防止随机数过期后，使用之前的请求重放攻击。可解决在半个小时候的重放问题（因为请求带的时间戳不在有效期）。  </li>
+</ol>
+<p>不用担心<code>随机数</code>或<code>时间戳</code>被伪造，如果被伪造了，签名会通不过。</p>
+<h4 id="3-3-1-优化一优点"><a href="#3-3-1-优化一优点" class="headerlink" title="3.3.1 优化一优点"></a>3.3.1 优化一优点</h4><ol>
+<li>实现简单，改造方便</li>
+</ol>
+<h4 id="3-3-2-优化一缺点"><a href="#3-3-2-优化一缺点" class="headerlink" title="3.3.2 优化一缺点"></a>3.3.2 优化一缺点</h4><ol>
+<li>要求client与server时区一致，并且时间偏差不大。</li>
+<li>丢包/服务超时，可能会误使client认为请求失败，并重新请求。如果是充值、转账类接口，会导致server处理多次。此时需要幂等。</li>
+</ol>
+<h3 id="3-4-优化二：幂等"><a href="#3-4-优化二：幂等" class="headerlink" title="3.4 优化二：幂等"></a>3.4 优化二：幂等</h3><p>以md5(params+key)为例  </p>
+<ol>
+<li>增加<code>订单id</code>参数，server实现同一订单id处理的幂等性。client保证不同请求的<code>订单id</code>不重复，重试请求的<code>订单id</code>不变。</li>
+<li>加密params也增加<code>订单id</code>，防止订单id伪造。</li>
+</ol>
+<h4 id="3-4-1-优化二优点"><a href="#3-4-1-优化二优点" class="headerlink" title="3.4.1 优化二优点"></a>3.4.1 优化二优点</h4><ol>
+<li>可以从数据层面最大程度保证安全</li>
+<li>配合appid + token，可以作为一个支付系统的基本安全机制</li>
+</ol>
+<h4 id="3-4-2-优化二缺点"><a href="#3-4-2-优化二缺点" class="headerlink" title="3.4.2 优化二缺点"></a>3.4.2 优化二缺点</h4><ol>
+<li>实现、改造成本较高：要求client和server都支持订单id，<strong>client要保证生成的订单id不重复，并且重试时订单id不变。server要保证订单处理的幂等性。</strong> </li>
+</ol>
+<h2 id="4-微信支付，企业付款接口安全分析"><a href="#4-微信支付，企业付款接口安全分析" class="headerlink" title="4 微信支付，企业付款接口安全分析"></a>4 微信支付，企业付款接口安全分析</h2><p>该接口可以通过商户号，给微信用户转账。</p>
+<h3 id="4-1-文档地址"><a href="#4-1-文档地址" class="headerlink" title="4.1 文档地址"></a>4.1 文档地址</h3><p><a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2" target="_blank" rel="noopener">https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2</a></p>
+<h3 id="4-2-主要有以下安全措施"><a href="#4-2-主要有以下安全措施" class="headerlink" title="4.2 主要有以下安全措施"></a>4.2 主要有以下安全措施</h3><ol>
+<li>限定https: 防范中间人</li>
+<li>client证书：client身份校验</li>
+<li>ip白名单: client鉴权</li>
+<li>md5签名: 见上文，文档：<a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=4_3" target="_blank" rel="noopener">https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=4_3</a></li>
+<li>随机字符串: 增加签名校验逆向难度</li>
+<li>订单id + server订单处理时的幂等性</li>
+</ol>
+<h3 id="4-3-分析"><a href="#4-3-分析" class="headerlink" title="4.3 分析"></a>4.3 分析</h3><p>感觉安全限制是非常严格了。。。。  </p>
+<ol>
+<li>不知server有未对随机数进行去重，但由于server订单处理的幂等性，基本可以应对重放攻击的问题。</li>
+<li>若想破解，要同时解决：client证书、ip白名单、md5key三个问题。</li>
+</ol>
+<h2 id="5-QQ钱包，企业付款接口安全分析"><a href="#5-QQ钱包，企业付款接口安全分析" class="headerlink" title="5. QQ钱包，企业付款接口安全分析"></a>5. QQ钱包，企业付款接口安全分析</h2><p>该接口可以通过商户号，给QQ用户转账。</p>
+<h3 id="5-1-文档地址"><a href="#5-1-文档地址" class="headerlink" title="5.1 文档地址"></a>5.1 文档地址</h3><p><a href="https://qpay.qq.com/buss/wiki/206/1215" target="_blank" rel="noopener">https://qpay.qq.com/buss/wiki/206/1215</a></p>
+<h3 id="5-2-安全措施"><a href="#5-2-安全措施" class="headerlink" title="5.2 安全措施"></a>5.2 安全措施</h3><ol>
+<li>限定https：防范中间人</li>
+<li>client证书：client身份鉴权</li>
+<li>md5签名，与微信支付类似</li>
+<li>不超过32位的随机字符串：增加签名校验逆向难度</li>
+<li>订单id + server订单处理时的幂等性</li>
+<li>op_user_id和md5(passwd)：商户操作员账号和密码</li>
+</ol>
+<h3 id="5-3-分析"><a href="#5-3-分析" class="headerlink" title="5.3 分析"></a>5.3 分析</h3><ol>
+<li>和微信接口的区别在于，微信支付接口多了ip白名单；QQ支付接口多了账号和密码</li>
+<li>若想破解，要同时解决：client证书、md5key、op_user账号三个问题。</li>
+</ol>
+<h2 id="6-总结一下"><a href="#6-总结一下" class="headerlink" title="6. 总结一下"></a>6. 总结一下</h2><p>问题可以分为两类，应对非法请求的鉴权，和应对合理请求的重试。</p>
+<h3 id="6-1-非法请求鉴权"><a href="#6-1-非法请求鉴权" class="headerlink" title="6.1 非法请求鉴权"></a>6.1 非法请求鉴权</h3><ol>
+<li>https：防范中间人，防止数据被嗅探，以及确认server合法性</li>
+<li>client证书：确认client身份</li>
+<li>ip白名单</li>
+<li>appid + token签名 + 随机字符串 + 时间戳：应对重放攻击和请求篡改</li>
+</ol>
+<h3 id="6-2-合法请求重试"><a href="#6-2-合法请求重试" class="headerlink" title="6.2 合法请求重试"></a>6.2 合法请求重试</h3><ol>
+<li>引入订单id和幂等处理：client生成不重复的订单id，服务端处理时保证幂等操作。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%90%8E%E5%8F%B0%E5%AE%89%E5%85%A8/" rel="tag"># 后台安全</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" rel="prev" title="分布式事务常见方案">
+      <i class="fa fa-chevron-left"></i> 分布式事务常见方案
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/18/redis%E5%85%B3%E9%94%AE%E5%8E%9F%E7%90%86/" rel="next" title="redis关键原理-1">
+      redis关键原理-1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MDA3NC8yNjU2NQ=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-https-client证书"><span class="nav-number">1.</span> <span class="nav-text">1 https + client证书</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-优点"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-缺点"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-client-ip白名单"><span class="nav-number">2.</span> <span class="nav-text">2 client ip白名单</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-优点"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-缺点"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-token-加密"><span class="nav-number">3.</span> <span class="nav-text">3 token 加密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-优点"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-缺点"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-优化一：增加-随机数、时间戳-参数"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 优化一：增加 随机数、时间戳 参数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-1-优化一优点"><span class="nav-number">3.3.1.</span> <span class="nav-text">3.3.1 优化一优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-2-优化一缺点"><span class="nav-number">3.3.2.</span> <span class="nav-text">3.3.2 优化一缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-优化二：幂等"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 优化二：幂等</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-1-优化二优点"><span class="nav-number">3.4.1.</span> <span class="nav-text">3.4.1 优化二优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-2-优化二缺点"><span class="nav-number">3.4.2.</span> <span class="nav-text">3.4.2 优化二缺点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-微信支付，企业付款接口安全分析"><span class="nav-number">4.</span> <span class="nav-text">4 微信支付，企业付款接口安全分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-文档地址"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 文档地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-主要有以下安全措施"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 主要有以下安全措施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-分析"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-QQ钱包，企业付款接口安全分析"><span class="nav-number">5.</span> <span class="nav-text">5. QQ钱包，企业付款接口安全分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-文档地址"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 文档地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-安全措施"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 安全措施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-分析"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-总结一下"><span class="nav-number">6.</span> <span class="nav-text">6. 总结一下</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-非法请求鉴权"><span class="nav-number">6.1.</span> <span class="nav-text">6.1 非法请求鉴权</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-合法请求重试"><span class="nav-number">6.2.</span> <span class="nav-text">6.2 合法请求重试</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="WordGe"
+      src="/avatar.png">
+  <p class="site-author-name" itemprop="name">WordGe</p>
+  <div class="site-description" itemprop="description">厉害了~</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WordGe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

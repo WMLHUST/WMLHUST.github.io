@@ -172,6 +172,455 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/20/%E5%B8%B8%E8%A7%81%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/20/%E5%B8%B8%E8%A7%81%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">常见缓存策略问题</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-20 16:19:28" itemprop="dateCreated datePublished" datetime="2020-08-20T16:19:28+08:00">2020-08-20</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、缓存穿透："><a href="#一、缓存穿透：" class="headerlink" title="一、缓存穿透："></a>一、缓存穿透：</h2><p>缓存穿透指，请求的key不在缓存中，因此会透过缓存，去请求DB或上游服务。具体可分三种情况：</p>
+<ol>
+<li><p>key有效，value不为空，然而未缓存<br>属于正常情况。</p>
+</li>
+<li><p>key有效，然而value为空，因此缓存未查到<br>为了避免重复访问，每次都穿透缓存，可以缓存一个约定好的无效值。读到该无效值即表示value为空，而无需访问DB。</p>
+</li>
+<li><p>key无效，缓存自然不存在<br>使用<code>布隆过滤器</code>或<code>位图</code>等，在处理请求前进行过滤，无效的key直接拒绝。当然需要预热，提前把有效的key放在<code>布隆过滤器</code>或<code>位图</code>里面。</p>
+</li>
+</ol>
+<h2 id="二、缓存雪崩"><a href="#二、缓存雪崩" class="headerlink" title="二、缓存雪崩"></a>二、缓存雪崩</h2><p>缓存雪崩，是指大量的key-value同时失效，导致大量请求穿透去访问DB。为了避免这种情况：</p>
+<ul>
+<li>设置key过期时间时，增加随机范围；</li>
+<li>缓存节点故障，也可能导致该问题。可以增加从节点，及时替换。缓存集群的多节点，可以使用一致性hash，将失效节点的访问分散到不同的节点上，避免引起连锁故障。</li>
+</ul>
+<h2 id="三、缓存热点"><a href="#三、缓存热点" class="headerlink" title="三、缓存热点"></a>三、缓存热点</h2><p>缓存热点，指有个别热点key访问特别大，比如明星、大V等，对热点key的访问可能会导致个别缓存节点压力巨大。<br>对于此类高并发读，可以设置多个副本，放置在不同的节点上，分摊压力。可以参考<a href="https://acac.fun/2020/05/12/%E9%AB%98%E5%B9%B6%E5%8F%91/" target="_blank" rel="noopener">高并发常见方案</a>。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ol>
+<li>还有一种情况是，大量请求，访问同一个key，而这个key刚好失效，DB会收到大量读取同一行数据的请求。这就要求，同一节点，对于访问同一key的重复请求，只访问一次DB，简单地加一个互斥锁即可（和golang的sync.Once非常像），使用redis分布式锁也可以。</li>
+<li>缓存最重要的是，减少DB的压力。对于数据的安全、一致性还是需要关系型数据库实现。</li>
+<li>缓存本身也会面临各种各样的问题，包括性能、可用性等。读写性能可以参考<a href="https://acac.fun/2020/05/12/%E9%AB%98%E5%B9%B6%E5%8F%91/" target="_blank" rel="noopener">高并发常见方案</a>。可用性一般使用主从架构来实现，保证主机出问题，从机可以及时顶替上去。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/18/Golang%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E6%A6%82%E8%A6%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/18/Golang%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E6%A6%82%E8%A6%81/" class="post-title-link" itemprop="url">Golang部分原理概要</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-18 15:33:30" itemprop="dateCreated datePublished" datetime="2020-08-18T15:33:30+08:00">2020-08-18</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/18/redis%E5%85%B3%E9%94%AE%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/18/redis%E5%85%B3%E9%94%AE%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">redis关键原理-1</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-18 15:32:44" itemprop="dateCreated datePublished" datetime="2020-08-18T15:32:44+08:00">2020-08-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">系统原理</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h2><p>redis是单线程，使用epoll多路复用，来处理网络请求。特殊的时候会使用额外进程程，比如执行bgsave的时候，会fork一个子进程来创建RDB文件。</p>
+<h2 id="不同类型数据的实现"><a href="#不同类型数据的实现" class="headerlink" title="不同类型数据的实现"></a>不同类型数据的实现</h2><h3 id="字符串（GET-SET…）"><a href="#字符串（GET-SET…）" class="headerlink" title="字符串（GET/SET…）"></a>字符串（GET/SET…）</h3><ol>
+<li>存储结构：int/raw/embstr。  </li>
+</ol>
+<ul>
+<li>raw：redis里重要的sds对象，相比C的原生string，有一些优化，如：空间预分配、惰性释放、防溢出等。  </li>
+<li>embstr针对短字符串进行了优化，分配一块连续的空间；然而无法应对长度变化。</li>
+</ul>
+<h3 id="列表（LPUSH-RPUSH…）"><a href="#列表（LPUSH-RPUSH…）" class="headerlink" title="列表（LPUSH/RPUSH…）"></a>列表（LPUSH/RPUSH…）</h3><ol>
+<li>存储结构：linkedlist / ziplist  </li>
+</ol>
+<ul>
+<li>linkedlist: 双向链表</li>
+<li>ziplist: 压缩列表，在元素较小(&lt;64字节)、较少(&lt;512个)时使用，可以节约内存，可以计算出最大使用32kb。使用一块连续的内存，类似数组的内存实现。</li>
+</ul>
+<h3 id="哈希（HSET-HGET…）"><a href="#哈希（HSET-HGET…）" class="headerlink" title="哈希（HSET/HGET…）"></a>哈希（HSET/HGET…）</h3><ol>
+<li>存储结构：hashtable / ziplist</li>
+</ol>
+<ul>
+<li><p>hashtable：</p>
+<ul>
+<li>使用单向链表解决冲突问题。</li>
+<li>Hash算法使用 MurmurHash，计算速度快，冲突率低。</li>
+<li>如果hashtable的负载因子过大或过小，会执行扩展或收缩，会有一个rehash动作。但是整个rehash动作不是一次性完成的，而是一个渐进的过程：<strong>将rehash分摊到每个添加、删除、查找和更新操作上，避免rehash巨大的工作量阻塞redis服务。</strong> 比如如果要查找，会同时在新旧hashtable里查找。</li>
+</ul>
+</li>
+<li><p>ziplist：<br>使用压缩列表同样是为了节省内存，也同样是在元素较小(&lt;64byte)、较少(&lt;512)个时使用。此时hget的时间复杂度就不是O(1)了，而是O(N)，不过由于元素不多，查找耗时影响不明显。</p>
+</li>
+</ul>
+<h3 id="集合-SADD-SREM…"><a href="#集合-SADD-SREM…" class="headerlink" title="集合 (SADD/SREM…)"></a>集合 (SADD/SREM…)</h3><ol>
+<li>存储结构</li>
+</ol>
+<ul>
+<li>hashtable：值为NULL</li>
+<li>intset，整数集合：<br>类似<strong>有序的整数数组</strong>，也是为了节省内存，只有元素都是整数、数量较少(&lt;512个)时使用。</li>
+</ul>
+<h3 id="有序集合（ZADD-ZREM…）"><a href="#有序集合（ZADD-ZREM…）" class="headerlink" title="有序集合（ZADD/ZREM…）"></a>有序集合（ZADD/ZREM…）</h3><ol>
+<li>存储结构</li>
+</ol>
+<ul>
+<li><p>skiplist 和 hashtable</p>
+<ul>
+<li>skiplist，大名鼎鼎的跳跃表，优点是：实现较为简单，然而平均查找效率可以达到O(logN)级别。</li>
+<li>对于跳跃表的结构、查找、插入过程可以参考网上的一些资料，或者查看<a href="https://github.com/redis/redis/blob/unstable/src/t_zset.c" target="_blank" rel="noopener">redis的源码</a>，非常简洁。</li>
+<li>hashtable，主要是为了加快ZSCORE的速度，如果仅用skiplist，ZSCORE的时间复杂度是O(logN)，有了hashtable，复杂度可以降至O(1)。（空间、时间互换的思想到处都是啊，朴素的原理）</li>
+</ul>
+</li>
+<li><p>ziplist，同样是为了降低内存占用，只有元素较小（&lt;64字节）、较少(&lt;128个)时使用</p>
+</li>
+</ul>
+<h3 id="过期淘汰策略"><a href="#过期淘汰策略" class="headerlink" title="过期淘汰策略"></a>过期淘汰策略</h3><ol>
+<li><p>定时删除：<br>在设置键过期时间的同时，创建定时器timer，到期后，立刻删除该键。<br>定时删除策略，对内存最友好，对CPU最不友好，处理大量的timer，也会占用很多CPU。</p>
+</li>
+<li><p>惰性删除：<br>redis在访问键的时候，检查过期时间。<br>对CPU最友好，但是对内存不友好。如果一个键过期后，不再访问到，将一直占用内存。</p>
+</li>
+<li><p>定期删除：<br>每隔一段时间，对redis进行一次检查，删除里面的过期键。  </p>
+</li>
+</ol>
+<p><strong>需要合理设置触发频率和执行时长。</strong></p>
+<p>redis同时使用惰性删除和定期删除两种策略。</p>
+<h3 id="哨兵Sentinel"><a href="#哨兵Sentinel" class="headerlink" title="哨兵Sentinel"></a>哨兵Sentinel</h3><ol>
+<li>哨兵是redis高可用的一个方案。可以用来监视redis主从集群的运行状况，及时替换故障节点。<br>sentinel也可以有多个，形成集群，共同监视redis集群。  </li>
+<li>sentinel默认每10s使用info命令，探测一次主机的在线状态，也可以根据主机的回复，自动发现从机。</li>
+<li>sentinel会订阅节点的<strong>sentinel</strong>:hello频道，也会通过给节点发送pub命令，往该频道发送消息。如此，多个sentinel便可互相探测到。  </li>
+<li>多个sentinel时，会自动选举一个leader，选举算法是raft。发生故障时，以leader sentinel的决策为准。   </li>
+<li>如果redis主机挂掉，sentinel选新的主机时，会根据优先级和复制偏移量确定选哪个从机。  </li>
+</ol>
+<h3 id="redis-cluster，分片集群"><a href="#redis-cluster，分片集群" class="headerlink" title="redis cluster，分片集群"></a>redis cluster，分片集群</h3><ol>
+<li>节点信息（比如负责的slot区间）的传播使用gossip协议</li>
+<li>集群分为16384个slot，集群中的每个节点可以处理0~16384个slot。只有每个slot都有节点在处理，集群才处于上线状态。每个节点都会记录，所有slot的指派节点。</li>
+<li>节点收到命令时，会计算键属于哪个slot，如果slot不属于自己负责，则会向client返回一个MOVED IP:PORT错误，客户端再次向正确的节点发送请求。</li>
+<li>重新分片，类似rehash的过程，不过这个是批量的，而非渐进式的。迁移过程中的查询过程与rehash过程类似。</li>
+</ol>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ol>
+<li>共享对象：对于整数型的数据，redis可以在不同kv间共享，来减少内存使用。对字符串不共享，因为字符串的比较复杂度是O(N)，而数字是O(1)。</li>
+<li>redis使用引用计数来回收内存，不用担心循环引用，因为引用关系简单</li>
+<li>主从模式下，过期键的删除由主机控制，从机不会主动删除过期键，而会等待主机删除时发过来的DEL命令控制。造成的问题是，如果键过期，主机未删除，在从机还会正常读到。</li>
+<li>如果一个主机有多个从机，那么当主机故障时，多个从机会选举出一个主机，选举算法同样基于raft。</li>
+<li>redis有个周期函数，每100ms执行一次，来对正在运行的服务器进行维护。比如：执行定期删除策略、检查是否满足save条件等。</li>
+<li>RDB文件是二进制格式，会对KV进行压缩，存储KV的时候，大致是Type-Key-Value的形式。</li>
+<li>AOF包含的只有写命令。为了解决AOF文件体积膨胀的问题，可以执行AOF重写操作。在执行BGREWRITEAOF命令时，redis会维护一个AOF重写缓冲区，记录执行期间的所有写命令。子进程重写完原有AOF文件后，再将缓冲区的内容，追加到新的AOF文件末尾，解决重写AOF期间的命令丢失问题。</li>
+<li>redis的复制：关键点在于同步和命令传播。同步是在从机启动时，直接将主机的RDB文件拉过来；同步成功后，会进入命令传播阶段，主机会将每一个写命令同步给从机。2.8版本以前，即使命令在传播过程中丢失，主、从都不会注意到，也不会重传。2.8版本及以后，增加了offset的概念，来实现部分同步和命令重传。</li>
+<li>当前的redis订阅&amp;消费模式，不会保存消息，如果publish时，subscriber不在线，将错过这条消息。更没有对消息持久化的操作。简单地理解，消息只会发送给当时在线的消费者。</li>
+<li>multi vs pipeline：<ul>
+<li>multi命令缓冲在server，pipeline缓冲在client</li>
+<li>multi，每个命令client会发送一次，pipeline是一次发送积累的多个命令</li>
+<li>multi/exec可以保证多个命令的执行在一个原子操作中，不被其他client的命令打断，pipeline不保证</li>
+</ul>
+</li>
+<li>WATCH命令，在exec时，检查watched keys，如果value发生了变化，就拒绝执行</li>
+<li>redis事务和传统RDBMS事务，最大的区别在于，redis不支持回滚，即使事务队列的某个命令执行期间出错，整个事务也会继续执行剩下的命令。因此可以说，不满足原子性，要么全部成功，要么全部失败。对于C一致性、I隔离性、D持久性，redis是可以满足的。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/14/%E8%B0%88%E4%B8%80%E4%B8%8B%E6%8E%A5%E5%8F%A3%E5%AE%89%E5%85%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/14/%E8%B0%88%E4%B8%80%E4%B8%8B%E6%8E%A5%E5%8F%A3%E5%AE%89%E5%85%A8/" class="post-title-link" itemprop="url">谈一下接口安全</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-14 10:35:20" itemprop="dateCreated datePublished" datetime="2020-08-14T10:35:20+08:00">2020-08-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">安全</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>此处安全非指SQL注入、XSS等web安全，而是指业务安全，比如权限、伪造参数等，包括但不限于http以及其他rpc协议的接口。<br>举个栗子，很多业务春节活动都会发红包，那么有一个独立的发红包服务，如何分配、控制接口的权限等安全？如何应对发放失败问题？这里提供几个思路，欢迎一起探讨，欢迎指出错误。</p>
+<h2 id="1-https-client证书"><a href="#1-https-client证书" class="headerlink" title="1 https + client证书"></a>1 https + client证书</h2><p>日常我们使用https，都是client校验server证书；实际上，也可以给用户分配client证书，以验证客户端身份。</p>
+<h3 id="1-1-优点"><a href="#1-1-优点" class="headerlink" title="1.1 优点"></a>1.1 优点</h3><p>可以有效保证server/client身份的真实性，只要client证书不泄露，就可保证client调用是正常的。</p>
+<h3 id="1-2-缺点"><a href="#1-2-缺点" class="headerlink" title="1.2 缺点"></a>1.2 缺点</h3><ol>
+<li>不支持http，性能没有http好</li>
+<li>若使用内网捕获的请求，直接重放，还是可以突破限制（很多时候是无意的，比如安全同事对接口的扫描；或测试环境的流量录制重放）</li>
+</ol>
+<h2 id="2-client-ip白名单"><a href="#2-client-ip白名单" class="headerlink" title="2 client ip白名单"></a>2 client ip白名单</h2><p>server只处理来自源ip在白名单内的请求。</p>
+<h3 id="2-1-优点"><a href="#2-1-优点" class="headerlink" title="2.1 优点"></a>2.1 优点</h3><ol>
+<li>一个大胆的想法，除非在client出口网关处，做tcp/ip包级别的解析伪造，其他情况可以保证安全。</li>
+<li>改造简单，甚至无需改造</li>
+</ol>
+<h3 id="2-2-缺点"><a href="#2-2-缺点" class="headerlink" title="2.2 缺点"></a>2.2 缺点</h3><ol>
+<li>未解决请求重放问题</li>
+<li>不适用于client ip经常发生变化的场景，比如ADSL拨号、服务自动扩容等</li>
+</ol>
+<h2 id="3-token-加密"><a href="#3-token-加密" class="headerlink" title="3 token 加密"></a>3 token 加密</h2><p>该token仅保存在client和server本地，不应该在请求里携带原始token，避免泄露。常见的是，用做加密或签名算法的key，。一般情况，用签名算法，比如md5(params+key)。加密算法，加密后的数据会特别长，影响性能。</p>
+<h3 id="3-1-优点"><a href="#3-1-优点" class="headerlink" title="3.1 优点"></a>3.1 优点</h3><p>实现简单、改造简单</p>
+<h3 id="3-2-缺点"><a href="#3-2-缺点" class="headerlink" title="3.2 缺点"></a>3.2 缺点</h3><p>未解决请求重放问题，可以用以下两种思路优化一下。</p>
+<h3 id="3-3-优化一：增加-随机数、时间戳-参数"><a href="#3-3-优化一：增加-随机数、时间戳-参数" class="headerlink" title="3.3 优化一：增加 随机数、时间戳 参数"></a>3.3 优化一：增加 随机数、时间戳 参数</h3><p>以md5(params+key)为例：  </p>
+<ol>
+<li>params增加<code>随机数</code>，使用redis检测是否重复。但不可能永久保存所有的随机数，随着累积，随机数冲突的概率会越来越大。因此需要给随机数增加时效性，比如半个小时过期。可解决半个小时内的重放问题。</li>
+<li>params增加<code>时间戳</code>，接口增加逻辑，检测时间戳是否在前后十分钟。防止随机数过期后，使用之前的请求重放攻击。可解决在半个小时候的重放问题（因为请求带的时间戳不在有效期）。  </li>
+</ol>
+<p>不用担心<code>随机数</code>或<code>时间戳</code>被伪造，如果被伪造了，签名会通不过。</p>
+<h4 id="3-3-1-优化一优点"><a href="#3-3-1-优化一优点" class="headerlink" title="3.3.1 优化一优点"></a>3.3.1 优化一优点</h4><ol>
+<li>实现简单，改造方便</li>
+</ol>
+<h4 id="3-3-2-优化一缺点"><a href="#3-3-2-优化一缺点" class="headerlink" title="3.3.2 优化一缺点"></a>3.3.2 优化一缺点</h4><ol>
+<li>要求client与server时区一致，并且时间偏差不大。</li>
+<li>丢包/服务超时，可能会误使client认为请求失败，并重新请求。如果是充值、转账类接口，会导致server处理多次。此时需要幂等。</li>
+</ol>
+<h3 id="3-4-优化二：幂等"><a href="#3-4-优化二：幂等" class="headerlink" title="3.4 优化二：幂等"></a>3.4 优化二：幂等</h3><p>以md5(params+key)为例  </p>
+<ol>
+<li>增加<code>订单id</code>参数，server实现同一订单id处理的幂等性。client保证不同请求的<code>订单id</code>不重复，重试请求的<code>订单id</code>不变。</li>
+<li>加密params也增加<code>订单id</code>，防止订单id伪造。</li>
+</ol>
+<h4 id="3-4-1-优化二优点"><a href="#3-4-1-优化二优点" class="headerlink" title="3.4.1 优化二优点"></a>3.4.1 优化二优点</h4><ol>
+<li>可以从数据层面最大程度保证安全</li>
+<li>配合appid + token，可以作为一个支付系统的基本安全机制</li>
+</ol>
+<h4 id="3-4-2-优化二缺点"><a href="#3-4-2-优化二缺点" class="headerlink" title="3.4.2 优化二缺点"></a>3.4.2 优化二缺点</h4><ol>
+<li>实现、改造成本较高：要求client和server都支持订单id，<strong>client要保证生成的订单id不重复，并且重试时订单id不变。server要保证订单处理的幂等性。</strong> </li>
+</ol>
+<h2 id="4-微信支付，企业付款接口安全分析"><a href="#4-微信支付，企业付款接口安全分析" class="headerlink" title="4 微信支付，企业付款接口安全分析"></a>4 微信支付，企业付款接口安全分析</h2><p>该接口可以通过商户号，给微信用户转账。</p>
+<h3 id="4-1-文档地址"><a href="#4-1-文档地址" class="headerlink" title="4.1 文档地址"></a>4.1 文档地址</h3><p><a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2" target="_blank" rel="noopener">https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2</a></p>
+<h3 id="4-2-主要有以下安全措施"><a href="#4-2-主要有以下安全措施" class="headerlink" title="4.2 主要有以下安全措施"></a>4.2 主要有以下安全措施</h3><ol>
+<li>限定https: 防范中间人</li>
+<li>client证书：client身份校验</li>
+<li>ip白名单: client鉴权</li>
+<li>md5签名: 见上文，文档：<a href="https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=4_3" target="_blank" rel="noopener">https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=4_3</a></li>
+<li>随机字符串: 增加签名校验逆向难度</li>
+<li>订单id + server订单处理时的幂等性</li>
+</ol>
+<h3 id="4-3-分析"><a href="#4-3-分析" class="headerlink" title="4.3 分析"></a>4.3 分析</h3><p>感觉安全限制是非常严格了。。。。  </p>
+<ol>
+<li>不知server有未对随机数进行去重，但由于server订单处理的幂等性，基本可以应对重放攻击的问题。</li>
+<li>若想破解，要同时解决：client证书、ip白名单、md5key三个问题。</li>
+</ol>
+<h2 id="5-QQ钱包，企业付款接口安全分析"><a href="#5-QQ钱包，企业付款接口安全分析" class="headerlink" title="5. QQ钱包，企业付款接口安全分析"></a>5. QQ钱包，企业付款接口安全分析</h2><p>该接口可以通过商户号，给QQ用户转账。</p>
+<h3 id="5-1-文档地址"><a href="#5-1-文档地址" class="headerlink" title="5.1 文档地址"></a>5.1 文档地址</h3><p><a href="https://qpay.qq.com/buss/wiki/206/1215" target="_blank" rel="noopener">https://qpay.qq.com/buss/wiki/206/1215</a></p>
+<h3 id="5-2-安全措施"><a href="#5-2-安全措施" class="headerlink" title="5.2 安全措施"></a>5.2 安全措施</h3><ol>
+<li>限定https：防范中间人</li>
+<li>client证书：client身份鉴权</li>
+<li>md5签名，与微信支付类似</li>
+<li>不超过32位的随机字符串：增加签名校验逆向难度</li>
+<li>订单id + server订单处理时的幂等性</li>
+<li>op_user_id和md5(passwd)：商户操作员账号和密码</li>
+</ol>
+<h3 id="5-3-分析"><a href="#5-3-分析" class="headerlink" title="5.3 分析"></a>5.3 分析</h3><ol>
+<li>和微信接口的区别在于，微信支付接口多了ip白名单；QQ支付接口多了账号和密码</li>
+<li>若想破解，要同时解决：client证书、md5key、op_user账号三个问题。</li>
+</ol>
+<h2 id="6-总结一下"><a href="#6-总结一下" class="headerlink" title="6. 总结一下"></a>6. 总结一下</h2><p>问题可以分为两类，应对非法请求的鉴权，和应对合理请求的重试。</p>
+<h3 id="6-1-非法请求鉴权"><a href="#6-1-非法请求鉴权" class="headerlink" title="6.1 非法请求鉴权"></a>6.1 非法请求鉴权</h3><ol>
+<li>https：防范中间人，防止数据被嗅探，以及确认server合法性</li>
+<li>client证书：确认client身份</li>
+<li>ip白名单</li>
+<li>appid + token签名 + 随机字符串 + 时间戳：应对重放攻击和请求篡改</li>
+</ol>
+<h3 id="6-2-合法请求重试"><a href="#6-2-合法请求重试" class="headerlink" title="6.2 合法请求重试"></a>6.2 合法请求重试</h3><ol>
+<li>引入订单id和幂等处理：client生成不重复的订单id，服务端处理时保证幂等操作。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/25/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -238,14 +687,18 @@
 </ol>
 <h3 id="2-3PC"><a href="#2-3PC" class="headerlink" title="2. 3PC"></a>2. 3PC</h3><p>3PC的三个阶段分别是<code>canCommit</code>、<code>preCommit</code>、<code>doCommit</code>。<br>相比两阶段提交：</p>
 <ol>
-<li>多了preCommit一步，实际是把2PC划分得更细。2PC在阶段1时，如果部分成功，则rollback。而在阶段2时，如果部分成功（实际上，每个实例应该保证，一旦收到commit，必定能成功。前提条件检查应放在阶段1做。），则只能不断重试。3PC拆分得更细后，根据不同阶段的超时，执行不同的动作。<br>当然，2PC中，实例也可以在阶段2，等待commit超时后rollback。不能是commit，因为可能阶段1不是全部成功，出于一致性考虑，只能rollback，然后调用方不断重试。<br>3PC分为两个阶段后，超时更好控制。在阶段2等待preCommit超时和2PC中等待commit超时一样，需要rollback。但是如果在阶段3等待doCommit超时，至少能确定canCommit都是成功的，因此可以执行commit。</li>
+<li>多了preCommit一步，实际是把2PC划分得更细。2PC在阶段1时，如果部分成功，则rollback。而在阶段2时，如果部分成功（实际上，每个实例应该保证，一旦收到commit，必定能成功。前提条件检查应放在阶段1做。），则只能不断重试。3PC拆分得更细后，根据不同阶段的超时，执行不同的动作，避免系统长时间阻塞。<br>当然，2PC中，实例也可以在阶段2，等待commit超时后rollback。不能是commit，因为可能阶段1不是全部成功，出于一致性考虑，只能rollback，然后调用方不断重试。<br>3PC分为两个阶段后，超时更好控制。在阶段2等待preCommit超时和2PC中等待commit超时一样，需要rollback，因为无法保证所有实例在阶段1的canCommit都OK。但是如果在阶段3等待doCommit超时，至少能确定canCommit都是成功的，因此可以执行commit。</li>
 <li>相比2PC，增加超时功能，减少对事务协调器的依赖，避免持续阻塞：<ul>
-<li>实例等待preCommit指令时，超时后自动 rollback</li>
-<li>实例等待doCommit指令时，超时后自动 commit</li>
+<li>实例回复完canCommit，在收到preCommit之前超时后自动 rollback，此时无法保证canCommit都回复OK，因此得rollback</li>
+<li>实例回复完preCommit，在第三阶段，停留超时后自动 commit，此时可以保证canCommit都回复OK，因此commit</li>
 </ul>
 </li>
 </ol>
-<p>然而，3PC也需要协调者，协调者也需要等待各个实例的回复，这些回复也可能超时。<strong>根源在于，通信信道没有保证，因此两个节点之间，如果超时，无法确定对方是宕机了，还是消息丢失了。所以，此时是成功了，还是失败了呢？</strong></p>
+<p>然而，3PC也需要协调者，协调者也需要等待各个实例的回复，这些回复也可能超时，超时后也会重试。<strong>根源在于，通信信道没有保证，因此两个节点之间，如果超时，无法确定对方是宕机了，还是消息丢失了。所以，此时是成功了，还是失败了呢？</strong><br>以及3PC也可能出现不一致的情况，比如进入preCommit阶段，部分实例回复OK，进入doCommit阶段（超时会自动Commit），此时另一部分网络中断，preCommit阶段超时后rollback。就出现了多实例的不一致。真正分布式一致性还要靠paxos、raft之类的一致性协议。  </p>
+<p>参考文章：</p>
+<ul>
+<li><a href="https://csruiliu.github.io/blog/20160530-intro-3pc/" target="_blank" rel="noopener">https://csruiliu.github.io/blog/20160530-intro-3pc/</a></li>
+</ul>
 <h3 id="3-TCC"><a href="#3-TCC" class="headerlink" title="3. TCC"></a>3. TCC</h3><p>TCC (<code>Try - Confirm - Cancel</code>)<br>相比TCC，更偏向应用层一点，比如服务间调用，各阶段之间会穿插一些业务逻辑等。2PC、3PC更像是协调两个数据库实例。比如：一个订单服务需要支付、库存、积分、物流多个服务的状态保持一致。一般使用一些TCC事务框架，框架需要保存事务日志之类的。   </p>
 <ul>
 <li>如果try失败，调用cancel</li>
@@ -257,10 +710,12 @@
 <ul>
 <li>介绍TCC流程，<a href="https://juejin.im/post/5bf201f7f265da610f63528a" target="_blank" rel="noopener">https://juejin.im/post/5bf201f7f265da610f63528a</a></li>
 <li>介绍TCC细节，<a href="https://yemablog.com/posts/tcc-1" target="_blank" rel="noopener">https://yemablog.com/posts/tcc-1</a></li>
+<li><a href="https://toutiao.io/posts/iwqysv/preview" target="_blank" rel="noopener">https://toutiao.io/posts/iwqysv/preview</a></li>
 </ul>
 <h3 id="4-消息中间件（实现的是最终一致）"><a href="#4-消息中间件（实现的是最终一致）" class="headerlink" title="4. 消息中间件（实现的是最终一致）"></a>4. 消息中间件（实现的是最终一致）</h3><p>这个没啥特别的，主要是利用消息队列解耦，从而A完成事务后可直接返回，B从MQ中取消息，发生错误则不断尝试。<br><img src="/images/tx-mq.jpg" alt=""></p>
 <p>特别提一下rocketMQ事务消息的实现原理：<br>rocketMQ的消息发送，分为两个阶段：prepare和confirm。<br>当confirm后，broker才会将消息传递给消费方。<br>对于一直未confirm的消息，broker会定期扫描，询问发送方此消息，是发送还是取消。   </p>
-<p>再特别提一下，两个服务之间，最终一致性的关键：<br>持久化中间件（MySQL，消息对列等），配合幂等重试。<br>比如转账，A服务扣了钱，记录进DB。异步调用B服务加钱接口，失败则重试，直到成功。（失败多次后，一般会人工介入）   </p>
+<p>再特别提一下，两个服务之间，最终一致性的关键：<br>持久化中间件（MySQL，消息对列等），配合幂等重试。<br>比如转账，A服务扣了钱，记录进DB。异步调用B服务加钱接口，失败则重试，直到成功。（失败多次后，一般会人工介入）。如果有必要，成功后回调A服务，通知该订单已完成。   </p>
+<p>然而基于消息队列的方案，只适合允许异步的场景。有的比如用户下单和扣库存，这种是多个操作共同决定了整个事务的成功与否，需要同步得到结果，就更适合使用TCC这种带补偿机制的方案，所谓补偿是指cancel操作会释放资源回池。</p>
 <h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ol>
 <li><a href="https://xiaomi-info.github.io/2020/01/02/distributed-transaction/" target="_blank" rel="noopener">https://xiaomi-info.github.io/2020/01/02/distributed-transaction/</a></li>
 </ol>
@@ -606,291 +1061,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/03/%E4%BB%8ECAS%E5%88%B0%E6%97%A0%E9%94%81%E9%98%9F%E5%88%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/avatar.png">
-      <meta itemprop="name" content="WordGe">
-      <meta itemprop="description" content="厉害了~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小本本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/06/03/%E4%BB%8ECAS%E5%88%B0%E6%97%A0%E9%94%81%E9%98%9F%E5%88%97/" class="post-title-link" itemprop="url">从CAS到无锁队列.md</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-06-03 17:24:15" itemprop="dateCreated datePublished" datetime="2020-06-03T17:24:15+08:00">2020-06-03</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%90%8E%E7%AB%AF/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>从无锁思想到CAS，再到具体实现，以无锁队列为例。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/06/03/%E4%BB%8ECAS%E5%88%B0%E6%97%A0%E9%94%81%E9%98%9F%E5%88%97/">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/29/PathEscape%E4%B8%8EQueryEscape/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/avatar.png">
-      <meta itemprop="name" content="WordGe">
-      <meta itemprop="description" content="厉害了~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小本本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/29/PathEscape%E4%B8%8EQueryEscape/" class="post-title-link" itemprop="url">PathEscape与QueryEscape</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-05-29 12:56:52" itemprop="dateCreated datePublished" datetime="2020-05-29T12:56:52+08:00">2020-05-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>搞懂PathEscape与QeuryEscape区别</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/05/29/PathEscape%E4%B8%8EQueryEscape/">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/28/%E5%85%B3%E4%BA%8E%E5%B7%A5%E4%BD%9C%E7%9A%84%E4%B8%80%E4%BA%9B%E6%83%B3%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/avatar.png">
-      <meta itemprop="name" content="WordGe">
-      <meta itemprop="description" content="厉害了~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小本本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/28/%E5%85%B3%E4%BA%8E%E5%B7%A5%E4%BD%9C%E7%9A%84%E4%B8%80%E4%BA%9B%E6%83%B3%E6%B3%95/" class="post-title-link" itemprop="url">关于工作的一些想法.md</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-05-28 14:36:40" itemprop="dateCreated datePublished" datetime="2020-05-28T14:36:40+08:00">2020-05-28</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <!-- 0. 工作的目的
-
-1. 浮于表面，不用思考
-
-2. 重复性，还是不用思考 -->
-
-<p>待写。。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/25/%E5%B8%B8%E8%A7%81web%E5%AE%89%E5%85%A8%E6%80%BB%E7%BB%93/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/avatar.png">
-      <meta itemprop="name" content="WordGe">
-      <meta itemprop="description" content="厉害了~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小本本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/25/%E5%B8%B8%E8%A7%81web%E5%AE%89%E5%85%A8%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">常见web安全总结</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-05-25 16:20:55" itemprop="dateCreated datePublished" datetime="2020-05-25T16:20:55+08:00">2020-05-25</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">安全</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>总结常见的几种Web安全问题，包括XSS、CSRF、SQL注入。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/05/25/%E5%B8%B8%E8%A7%81web%E5%AE%89%E5%85%A8%E6%80%BB%E7%BB%93/">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -958,7 +1132,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">33</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -971,7 +1145,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
