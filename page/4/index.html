@@ -172,6 +172,180 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/28/CSAPP-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/10/28/CSAPP-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E6%BC%AB%E6%B8%B8/" class="post-title-link" itemprop="url">CSAPP-1-计算机系统漫游</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-10-28 21:39:38" itemprop="dateCreated datePublished" datetime="2016-10-28T21:39:38+08:00">2016-10-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">系统原理</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/CSAPP/" itemprop="url" rel="index"><span itemprop="name">CSAPP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>工作找得差不多之后，总是感觉技术方向很迷茫。后面看一本书《暗时间》，上面说的对：</p>
+<blockquote>
+<p>大量的新技术其实只是一层皮，背后的支撑技术其实都是十来年不变的东西。底层知识永不过时；算法数据结构永不过时；分析问题和解决问题的能力永不过时；强大的学习能力和旺盛的求知欲永不过时；你大脑的思维方式永不过时。</p>
+</blockquote>
+<blockquote>
+<p>关于读书速度<br>有选择地阅读。 对于一些逻辑混乱，作者都不知道自己问题是什么，或者上来就是技术方法细节，而不是从方法背后的理念出发，直观解释的书，没必要一定说服自己读下去，继续读反而是增加烦恼，浪费时间。</p>
+</blockquote>
+<blockquote>
+<p>快or慢。 快慢从来不是一个问题，好书、知识密度大、需要思考的书就慢读。质量差，没啥的，该快就快，有必要过一遍的话，该不读就直接扔一边去，没必要纠结。<br>“三天打鱼，两天晒网”的人往往最后会变成“整天晒网，永不打鱼”。也就是说耐心和恒心吧。一本再厚的书，每天看一点，<strong>总有看完的一天</strong>。</p>
+</blockquote>
+<h3 id="言归正传"><a href="#言归正传" class="headerlink" title="言归正传"></a>言归正传</h3><ol>
+<li><p>信息就是 <strong>位+上下文</strong></p>
+</li>
+<li><p>利用直接存储器存取（DMA）技术，数据可以不通过处理器而直接从磁盘到达内存。</p>
+</li>
+<li><p>hello world 程序在执行的时候，hello world 字符串复制路径：硬盘-&gt;主存-&gt;寄存器-&gt;显示设备。</p>
+</li>
+<li><p>一个典型系统的硬件组成：<br><img src="/images/csapp-1.1.jpeg" alt="一个典型系统的硬件组成"></p>
+</li>
+<li><p>存储设备形成设备层次<br><img src="/images/csapp-1.2.jpeg" alt="存储器层次"></p>
+</li>
+<li><p>进程的上下文切换<br><img src="/images/csapp-1.3.jpeg" alt="这里写图片描述"><br>系统调用和中断的关系就在于，当进程发出系统调用申请的时候，会产生一个软件中断。产生这个软件中断以后，系统会去对这个软中断进行处理，这个时候进程就处于核心态了。</p>
+</li>
+<li><p>操作系统有两个基本的功能：</p>
+<blockquote>
+<ol>
+<li>防止硬件被失控的应用程序滥用。（应用程序只能通过系统调用的方式来请求）</li>
+<li>向应用程序提供简单一致的机制来控制复杂而又大相径庭的低级硬件设备。比如对于所有的I/O设备，包括硬盘、键盘、显示器、网络都视为文件，通过一组称为UNIX I/O的系统函数调用来实现输入输出。</li>
+</ol>
+</blockquote>
+</li>
+<li><p>操作系统内核是应用程序和硬件之间的媒介。提供三个基本的抽象：</p>
+<blockquote>
+<ol>
+<li>文件是I/O设备的抽象</li>
+<li>虚拟存储器是对主存和磁盘的抽象</li>
+<li>进程是对一个正在运行的程序的抽象，包括处理器、主存和IO设备。</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/03/24/java-io-FileNotFoundException-%E5%86%8D%E6%AC%A1%E8%B8%A9%E5%9D%91windows%E7%BC%96%E7%A0%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/03/24/java-io-FileNotFoundException-%E5%86%8D%E6%AC%A1%E8%B8%A9%E5%9D%91windows%E7%BC%96%E7%A0%81/" class="post-title-link" itemprop="url">java.io.FileNotFoundException-再次踩坑windows编码</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-03-24 16:26:10" itemprop="dateCreated datePublished" datetime="2016-03-24T16:26:10+08:00">2016-03-24</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>####<strong>问题</strong></p>
+<p>为了方便读取文件，直接从windows文件属性里复制了路径，如图：<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTEzNTAxMTMz?x-oss-process=image/format,png" alt="这里写图片描述"></p>
+<p>然后贴到eclipse里：<br>    <img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTQ1NTA2ODUw?x-oss-process=image/format,png" alt="这里写图片描述"><br>    <img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTUwNDMyNTQ5?x-oss-process=image/format,png" alt="这里写图片描述"></p>
+<p>表面上看pathIn和pathIn2似乎没有什么不同，然而，在创建File对象时，总是提示java.io.FileNotFoundException，要报警，上次就碰到这个问题但是没解决。上次碰到的问题是，在windows一个问价夹里竟然可以存在两个同名文件！！<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTUwNjQ1OTc0?x-oss-process=image/format,png" alt="这里写图片描述"><br>####<strong>是时候展现真正的技术了</strong><br>我把那些字符串都复制出来，写一个简单的html来测试一下：<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTUwODIyNDAy?x-oss-process=image/format,png" alt="这里写图片描述"><br>看下实际效果：<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTUxOTE5ODE4?x-oss-process=image/format,png" alt="这里写图片描述"><br>这下明了了，前面的”&amp;#8234 ;”特么是个什么鬼，CSDN markdown也打不出来这个字符串，分号和4之间没有空格。搜一下吧：<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTU1NTE4Nzk1?x-oss-process=image/format,png" alt="这里写图片描述"><br>从左到右的植入?<br>关于双向文本<br><a href="https://en.wikipedia.org/wiki/Bi-directional_text" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Bi-directional_text</a><br>推荐：<a href="http://www.iamcal.com/understanding-bidirectional-text/" target="_blank" rel="noopener">http://www.iamcal.com/understanding-bidirectional-text/</a><br>其实是unicode标准里，为了适配某些字符集的规定，比如阿拉伯语，显示的时候是从右向左的（为啥？难道他们写字是从右向左？果然是这样！！刚查了一下）<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTYxNTIyODkw?x-oss-process=image/format,png" alt="这里写图片描述"><br>后来我发现，windows里面其实有个小提示的，看箭头指的地方，有个浅灰色的竖线。然而复制到其他地方就不显示了，notepad里显示全部字符也不显示，但是确实被复制过去了。<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMzI0MTYxMjQ4NTIx?x-oss-process=image/format,png" alt="这里写图片描述"></p>
+<p>这个问题网上的暂时还没见到这种解法，对于文件确实存在，但是总提示FileNotFound的，stackoverflow也都是让检查文件名是不是违反了windows的命名规则，希望这篇博文有所帮助。</p>
+<p>刚开始简直有在电脑上装Ubuntu的冲动，然而想了想那么多的开发环境（手动再见）</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/29/%E7%BC%96%E7%A0%81%E7%A5%9E%E5%9D%91%E4%B9%8BBOM/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -475,7 +649,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

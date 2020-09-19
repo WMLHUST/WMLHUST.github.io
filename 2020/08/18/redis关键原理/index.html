@@ -27,7 +27,7 @@
 <meta property="og:site_name" content="小本本">
 <meta property="og:description" content="IO模型redis是单线程，使用epoll多路复用，来处理网络请求。特殊的时候会使用额外进程程，比如执行bgsave的时候，会fork一个子进程来创建RDB文件。 不同类型数据的实现字符串（GET&#x2F;SET…） 存储结构：int&#x2F;raw&#x2F;embstr。     raw：redis里重要的sds对象，相比C的原生string，有一些优化，如：空间预分配、惰性释放、防溢出等。   embstr针对短字符">
 <meta property="article:published_time" content="2020-08-18T07:32:44.000Z">
-<meta property="article:modified_time" content="2020-08-18T07:32:44.000Z">
+<meta property="article:modified_time" content="2020-09-01T07:32:44.000Z">
 <meta property="article:author" content="WordGe">
 <meta property="article:tag" content="redis">
 <meta name="twitter:card" content="summary">
@@ -201,6 +201,13 @@
 
               <time title="Created: 2020-08-18 15:32:44" itemprop="dateCreated datePublished" datetime="2020-08-18T15:32:44+08:00">2020-08-18</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-09-01 15:32:44" itemprop="dateModified" datetime="2020-09-01T15:32:44+08:00">2020-09-01</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -276,7 +283,7 @@
 <li><p>ziplist，同样是为了降低内存占用，只有元素较小（&lt;64字节）、较少(&lt;128个)时使用</p>
 </li>
 </ul>
-<h3 id="过期淘汰策略"><a href="#过期淘汰策略" class="headerlink" title="过期淘汰策略"></a>过期淘汰策略</h3><ol>
+<h3 id="Expire的过期淘汰策略"><a href="#Expire的过期淘汰策略" class="headerlink" title="Expire的过期淘汰策略"></a>Expire的过期淘汰策略</h3><ol>
 <li><p>定时删除：<br>在设置键过期时间的同时，创建定时器timer，到期后，立刻删除该键。<br>定时删除策略，对内存最友好，对CPU最不友好，处理大量的timer，也会占用很多CPU。</p>
 </li>
 <li><p>惰性删除：<br>redis在访问键的时候，检查过期时间。<br>对CPU最友好，但是对内存不友好。如果一个键过期后，不再访问到，将一直占用内存。</p>
@@ -284,7 +291,7 @@
 <li><p>定期删除：<br>每隔一段时间，对redis进行一次检查，删除里面的过期键。  </p>
 </li>
 </ol>
-<p><strong>需要合理设置触发频率和执行时长。</strong></p>
+<p><strong>需要合理设置触发频率和执行时长。</strong>  </p>
 <p>redis同时使用惰性删除和定期删除两种策略。</p>
 <h3 id="哨兵Sentinel"><a href="#哨兵Sentinel" class="headerlink" title="哨兵Sentinel"></a>哨兵Sentinel</h3><ol>
 <li>哨兵是redis高可用的一个方案。可以用来监视redis主从集群的运行状况，及时替换故障节点。<br>sentinel也可以有多个，形成集群，共同监视redis集群。  </li>
@@ -300,23 +307,42 @@
 <li>重新分片，类似rehash的过程，不过这个是批量的，而非渐进式的。迁移过程中的查询过程与rehash过程类似。</li>
 </ol>
 <h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ol>
-<li>共享对象：对于整数型的数据，redis可以在不同kv间共享，来减少内存使用。对字符串不共享，因为字符串的比较复杂度是O(N)，而数字是O(1)。</li>
-<li>redis使用引用计数来回收内存，不用担心循环引用，因为引用关系简单</li>
-<li>主从模式下，过期键的删除由主机控制，从机不会主动删除过期键，而会等待主机删除时发过来的DEL命令控制。造成的问题是，如果键过期，主机未删除，在从机还会正常读到。</li>
-<li>如果一个主机有多个从机，那么当主机故障时，多个从机会选举出一个主机，选举算法同样基于raft。</li>
-<li>redis有个周期函数，每100ms执行一次，来对正在运行的服务器进行维护。比如：执行定期删除策略、检查是否满足save条件等。</li>
-<li>RDB文件是二进制格式，会对KV进行压缩，存储KV的时候，大致是Type-Key-Value的形式。</li>
-<li>AOF包含的只有写命令。为了解决AOF文件体积膨胀的问题，可以执行AOF重写操作。在执行BGREWRITEAOF命令时，redis会维护一个AOF重写缓冲区，记录执行期间的所有写命令。子进程重写完原有AOF文件后，再将缓冲区的内容，追加到新的AOF文件末尾，解决重写AOF期间的命令丢失问题。</li>
-<li>redis的复制：关键点在于同步和命令传播。同步是在从机启动时，直接将主机的RDB文件拉过来；同步成功后，会进入命令传播阶段，主机会将每一个写命令同步给从机。2.8版本以前，即使命令在传播过程中丢失，主、从都不会注意到，也不会重传。2.8版本及以后，增加了offset的概念，来实现部分同步和命令重传。</li>
-<li>当前的redis订阅&amp;消费模式，不会保存消息，如果publish时，subscriber不在线，将错过这条消息。更没有对消息持久化的操作。简单地理解，消息只会发送给当时在线的消费者。</li>
-<li>multi vs pipeline：<ul>
+<li><p>共享对象：对于整数型的数据，redis可以在不同kv间共享，来减少内存使用。对字符串不共享，因为字符串的比较复杂度是O(N)，而数字是O(1)。</p>
+</li>
+<li><p>redis使用引用计数来回收内存，不用担心循环引用，因为引用关系简单</p>
+</li>
+<li><p>主从模式下，过期键的删除由主机控制，从机不会主动删除过期键，而会等待主机删除时发过来的DEL命令控制。造成的问题是，如果键过期，主机未删除，在从机还会正常读到。</p>
+</li>
+<li><p>主从同步过程：  </p>
+<ul>
+<li>master 执行bgsave 备份rdb镜像，并同时将后续修改操作记录到内存buffer</li>
+<li>master备份完成后，先将rdb文件传输给slave</li>
+<li>slave将rdb镜像加载到内存，之后重放master备份期间的修改即可</li>
+</ul>
+</li>
+<li><p>如果一个主机有多个从机，那么当主机故障时，多个从机会选举出一个主机，选举算法同样基于raft。</p>
+</li>
+<li><p>redis有个周期函数，每100ms执行一次，来对正在运行的服务器进行维护。比如：执行定期删除策略、检查是否满足save条件等。</p>
+</li>
+<li><p>RDB文件是二进制格式，会对KV进行压缩，存储KV的时候，大致是Type-Key-Value的形式。</p>
+</li>
+<li><p>AOF包含的只有写命令。为了解决AOF文件体积膨胀的问题，可以执行AOF重写操作。在执行BGREWRITEAOF命令时，redis会维护一个AOF重写缓冲区，记录执行期间的所有写命令。子进程重写AOF完成后，再将缓冲区的内容，追加到新的AOF文件末尾，解决重写AOF期间的命令丢失问题。</p>
+</li>
+<li><p>redis的复制：关键点在于同步和命令传播。同步是在从机启动时，直接将主机的RDB文件拉过来；同步成功后，会进入命令传播阶段，主机会将每一个写命令同步给从机。2.8版本以前，即使命令在传播过程中丢失，主、从都不会注意到，也不会重传。2.8版本及以后，增加了offset的概念，来实现部分同步和命令重传。</p>
+</li>
+<li><p>当前的redis订阅&amp;消费模式，不会保存消息，如果publish时，subscriber不在线，将错过这条消息。更没有对消息持久化的操作。简单地理解，消息只会发送给当时在线的消费者。</p>
+</li>
+<li><p>multi vs pipeline：</p>
+<ul>
 <li>multi命令缓冲在server，pipeline缓冲在client</li>
 <li>multi，每个命令client会发送一次，pipeline是一次发送积累的多个命令</li>
 <li>multi/exec可以保证多个命令的执行在一个原子操作中，不被其他client的命令打断，pipeline不保证</li>
 </ul>
 </li>
-<li>WATCH命令，在exec时，检查watched keys，如果value发生了变化，就拒绝执行</li>
-<li>redis事务和传统RDBMS事务，最大的区别在于，redis不支持回滚，即使事务队列的某个命令执行期间出错，整个事务也会继续执行剩下的命令。因此可以说，不满足原子性，要么全部成功，要么全部失败。对于C一致性、I隔离性、D持久性，redis是可以满足的。</li>
+<li><p>WATCH命令，在exec时，检查watched keys，如果value发生了变化，就拒绝执行</p>
+</li>
+<li><p>redis事务和传统RDBMS事务，最大的区别在于，redis不支持回滚，即使事务队列的某个命令执行期间出错，整个事务也会继续执行剩下的命令。因此可以说，不满足原子性的要求：要么全部成功，要么全部失败。对于C一致性、I隔离性、D持久性，redis是可以满足的。</p>
+</li>
 </ol>
 
     </div>
@@ -406,7 +432,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#IO模型"><span class="nav-number">1.</span> <span class="nav-text">IO模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不同类型数据的实现"><span class="nav-number">2.</span> <span class="nav-text">不同类型数据的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串（GET-SET…）"><span class="nav-number">2.1.</span> <span class="nav-text">字符串（GET&#x2F;SET…）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#列表（LPUSH-RPUSH…）"><span class="nav-number">2.2.</span> <span class="nav-text">列表（LPUSH&#x2F;RPUSH…）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哈希（HSET-HGET…）"><span class="nav-number">2.3.</span> <span class="nav-text">哈希（HSET&#x2F;HGET…）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集合-SADD-SREM…"><span class="nav-number">2.4.</span> <span class="nav-text">集合 (SADD&#x2F;SREM…)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有序集合（ZADD-ZREM…）"><span class="nav-number">2.5.</span> <span class="nav-text">有序集合（ZADD&#x2F;ZREM…）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#过期淘汰策略"><span class="nav-number">2.6.</span> <span class="nav-text">过期淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哨兵Sentinel"><span class="nav-number">2.7.</span> <span class="nav-text">哨兵Sentinel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis-cluster，分片集群"><span class="nav-number">2.8.</span> <span class="nav-text">redis cluster，分片集群</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他"><span class="nav-number">2.9.</span> <span class="nav-text">其他</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#IO模型"><span class="nav-number">1.</span> <span class="nav-text">IO模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不同类型数据的实现"><span class="nav-number">2.</span> <span class="nav-text">不同类型数据的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串（GET-SET…）"><span class="nav-number">2.1.</span> <span class="nav-text">字符串（GET&#x2F;SET…）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#列表（LPUSH-RPUSH…）"><span class="nav-number">2.2.</span> <span class="nav-text">列表（LPUSH&#x2F;RPUSH…）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哈希（HSET-HGET…）"><span class="nav-number">2.3.</span> <span class="nav-text">哈希（HSET&#x2F;HGET…）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集合-SADD-SREM…"><span class="nav-number">2.4.</span> <span class="nav-text">集合 (SADD&#x2F;SREM…)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有序集合（ZADD-ZREM…）"><span class="nav-number">2.5.</span> <span class="nav-text">有序集合（ZADD&#x2F;ZREM…）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Expire的过期淘汰策略"><span class="nav-number">2.6.</span> <span class="nav-text">Expire的过期淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哨兵Sentinel"><span class="nav-number">2.7.</span> <span class="nav-text">哨兵Sentinel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis-cluster，分片集群"><span class="nav-number">2.8.</span> <span class="nav-text">redis cluster，分片集群</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他"><span class="nav-number">2.9.</span> <span class="nav-text">其他</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -422,7 +448,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

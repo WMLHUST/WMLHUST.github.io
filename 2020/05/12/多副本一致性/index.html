@@ -27,7 +27,7 @@
 <meta property="og:site_name" content="小本本">
 <meta property="og:description" content="同步本质每台机器都把收到的请求按日志存下来，各机器的日志文件保持一致。选择存储“事件流”，而非最终状态，原因是：  日志只有一种操作，append，相对简单  Paxos算法1. Basic Paxos 两个角色，Proposer 和 Acceptor，以及一个自增ID（n） 两个阶段，Propose阶段 和 Accept 阶段 Propose阶段 proposer广播消息，id为n，prepar">
 <meta property="article:published_time" content="2020-05-12T03:23:33.000Z">
-<meta property="article:modified_time" content="2020-07-12T08:46:48.033Z">
+<meta property="article:modified_time" content="2020-09-16T03:47:34.281Z">
 <meta property="article:author" content="WordGe">
 <meta property="article:tag" content="分布式">
 <meta name="twitter:card" content="summary">
@@ -206,7 +206,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-07-12 16:46:48" itemprop="dateModified" datetime="2020-07-12T16:46:48+08:00">2020-07-12</time>
+                <time title="Modified: 2020-09-16 11:47:34" itemprop="dateModified" datetime="2020-09-16T11:47:34+08:00">2020-09-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -243,7 +243,7 @@
 <li>Propose阶段<ol>
 <li>proposer广播消息，id为n，prepare(n)</li>
 <li>acceptor接收消息，如果n &gt; local N，则回复yes</li>
-<li>proposer收到半数以上的yes，开始广播，否则id自增，重新广播</li>
+<li>proposer收到半数以上的yes，开始广播Accept，否则id自增，重新广播Propose</li>
 </ol>
 </li>
 <li>Acctpt阶段<ol>
@@ -272,7 +272,7 @@
 <li>选举算法，保证同一时间只有一个leader。<ol>
 <li>如果选举请求里，日志的term和index比自己本地的新，则返回true，否则返回false。</li>
 <li>candidate收到多数派返回true，则成为leader</li>
-<li>每个节点只能投一次true，防止多个leader。因此选取出的leader不一定是最新的，但一定比大多数节点新。</li>
+<li>每个节点只能投一次true，防止多个leader。<strong>因此选取出的leader不一定是最新的，但一定比大多数节点新。</strong> </li>
 </ol>
 </li>
 </ol>
@@ -318,6 +318,7 @@
 </ol>
 </li>
 <li>broadcast阶段</li>
+<li>zookeeper有个obverser模式，很有意思。可以在不影响写性能的情况下，提升读性能。主要原理就是：增加一类节点，处于observer状态。这些节点不参与投票，只提供读的功能，相当于额外的follower节点副本。（其实，对于提升读性能，总结也就两个办法：加缓存或加副本冗余。）</li>
 </ol>
 <h3 id="raft-vs-zab"><a href="#raft-vs-zab" class="headerlink" title="raft vs zab"></a>raft vs zab</h3><p>参考：<a href="https://my.oschina.net/pingpangkuangmo/blog/782702" target="_blank" rel="noopener">https://my.oschina.net/pingpangkuangmo/blog/782702</a></p>
 <ol>
@@ -331,8 +332,8 @@
 <p>那么下一个leader该如何来判定这些日志呢？</p>
 <p>下面分别来看看Raft和ZooKeeper的处理策略：</p>
 <p>Raft：对于之前term的过半或未过半复制的日志采取的是保守的策略，全部判定为未提交，只有当当前term的日志过半了，才会顺便将之前term的日志进行提交。</p>
-<p>ZooKeeper：采取激进的策略，对于所有过半还是未过半的日志都判定为提交，都将其应用到状态机中</p>
-<p>Raft的保守策略更多是因为Raft在leader选举完成之后，没有同步更新过程来保持和leader一致（在可以对外服务之前的这一同步过程）。而ZooKeeper是有该过程的</p>
+<p>ZooKeeper：采取激进的策略，对于所有过半还是未过半的日志都判定为提交，都将其应用到状态机中。</p>
+<p>Raft的保守策略更多是因为Raft在leader选举完成之后，没有同步更新过程来保持和leader一致（在可以对外服务之前的这一同步过程）。而ZooKeeper是有该过程的。</p>
 
     </div>
 
@@ -437,7 +438,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

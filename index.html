@@ -172,6 +172,194 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/25/Gotrace%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/25/Gotrace%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">Gotrace工具使用整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-25 11:37:42" itemprop="dateCreated datePublished" datetime="2020-08-25T11:37:42+08:00">2020-08-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>gotrace是观察goroutine调度和gc行为非常非常好的一个工具，但是无论官方，还是网上，都没有非常好的文档，特此记录、整理。读者最好有对golang的调度和GC过程有一定了解，可以参考：<a href="https://acac.fun/2020/08/18/Golang%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E6%A6%82%E8%A6%81/" target="_blank" rel="noopener">Golang部分原理概要</a></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://making.pusher.com/go-tool-trace/" target="_blank" rel="noopener">https://making.pusher.com/go-tool-trace/</a></li>
+<li></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/25/GCtrace%E7%90%86%E8%A7%A3%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/avatar.png">
+      <meta itemprop="name" content="WordGe">
+      <meta itemprop="description" content="厉害了~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小本本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/25/GCtrace%E7%90%86%E8%A7%A3%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">GCtrace理解整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-25 11:37:28" itemprop="dateCreated datePublished" datetime="2020-08-25T11:37:28+08:00">2020-08-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>之前定位问题时，找了很多官方、网上的一些资料，现在整理出来：</p>
+<p>export GODEBUG=gctrace=1，可以打开gc trace开关，具体信息会输出到stderr。<br>这是一个gc trace的一条具体信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gc 1405 @6.068s 11%: 0.058+1.2+0.083 ms clock, 0.70+2.5&#x2F;1.5&#x2F;0+0.99 ms cpu, 7-&gt;11-&gt;6 MB, 10 MB goal, 12 P</span><br></pre></td></tr></table></figure>
+<p>可以分为几部分：</p>
+<ol>
+<li>整体指标  gc 1405 @6.068s 11%  </li>
+</ol>
+<ul>
+<li>gc 1405，表示第1405次GC  </li>
+<li>@6.068s, 表示程序启动至今，执行了6.068s  </li>
+<li>11%，本次GC总共占用了11%的CPU  </li>
+</ul>
+<ol start="2">
+<li>墙上时间  0.058+1.2+0.083 ms clock  </li>
+</ol>
+<ul>
+<li>0.058，Mark Prepare阶段的时间，STW状态  </li>
+<li>1.2，Marking阶段的时间，就是并发mark阶段  </li>
+<li>0.083，Mark Termination阶段耗时，STW状态<br>需要了解<a href="https://acac.fun/2020/08/18/Golang%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E6%A6%82%E8%A6%81/" target="_blank" rel="noopener">Golang GC的过程</a></li>
+</ul>
+<ol start="3">
+<li>CPU时间 0.70+2.5/1.5/0+0.99 ms cpu  </li>
+</ol>
+<ul>
+<li>0.70，Mark Prepare阶段STW的CPU时间  </li>
+<li>2.5，Marking阶段，mutator assist的CPU时间  </li>
+<li>1.5，Marking阶段，background gc time，包括 delicated 和 fractional   </li>
+<li>0，markding阶段，idle gc time  </li>
+<li>0.99，Mark Termination阶段CPU时间  </li>
+</ul>
+<ol start="4">
+<li>内存  7-&gt;11-&gt;6 MB, 10 MB goal</li>
+</ol>
+<ul>
+<li>7，mark之前的堆大小</li>
+<li>11，mark之后的堆大小，意思是在marking过程中，又有4M的堆分配</li>
+<li>6，mark结束后，被标记为存活的堆内存，意味着下次GC的目标是12Mb</li>
+<li>10MB goal，下次堆内存达到10MB时，执行GC</li>
+</ul>
+<ol start="5">
+<li>12 P</li>
+</ol>
+<ul>
+<li>P的数量，也就是GoMaxProcs大小</li>
+</ul>
+<ol start="6">
+<li>其他，GC forced</li>
+</ol>
+<ul>
+<li>如果两分钟没有GC，就会强制执行一次GC，此时打印GC forced</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/20/%E5%B8%B8%E8%A7%81%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5%E9%97%AE%E9%A2%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -227,7 +415,7 @@
 <h2 id="三、缓存热点"><a href="#三、缓存热点" class="headerlink" title="三、缓存热点"></a>三、缓存热点</h2><p>缓存热点，指有个别热点key访问特别大，比如明星、大V等，对热点key的访问可能会导致个别缓存节点压力巨大。<br>对于此类高并发读，可以设置多个副本，放置在不同的节点上，分摊压力。可以参考<a href="https://acac.fun/2020/05/12/%E9%AB%98%E5%B9%B6%E5%8F%91/" target="_blank" rel="noopener">高并发常见方案</a>。</p>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ol>
 <li>还有一种情况是，大量请求，访问同一个key，而这个key刚好失效，DB会收到大量读取同一行数据的请求。这就要求，同一节点，对于访问同一key的重复请求，只访问一次DB，简单地加一个互斥锁即可（和golang的sync.Once非常像），使用redis分布式锁也可以。</li>
-<li>缓存最重要的是，减少DB的压力。对于数据的安全、一致性还是需要关系型数据库实现。</li>
+<li><strong>缓存最重要的是，减少DB的压力。对于数据的安全、一致性还是需要关系型数据库实现。</strong></li>
 <li>缓存本身也会面临各种各样的问题，包括性能、可用性等。读写性能可以参考<a href="https://acac.fun/2020/05/12/%E9%AB%98%E5%B9%B6%E5%8F%91/" target="_blank" rel="noopener">高并发常见方案</a>。可用性一般使用主从架构来实现，保证主机出问题，从机可以及时顶替上去。</li>
 </ol>
 
@@ -354,7 +542,16 @@
 <li>监控线程执行时  </li>
 </ul>
 <p>检查时，只需检查堆顶的timer（因为堆顶的timer是最先到期的），如果到触发时间，则起一个goroutine，执行对应回调函数。而goroutine的调度时间，也是不可控的，因此不能精确依赖定时器的触发时间。</p>
-<p>其他还有一些常见的定时器实现，比如nginx使用红黑树、linux内核使用时间轮等。   </p>
+<p>还有一些其他的定时器实现方式，比如nginx使用红黑树、linux内核使用时间轮等。   </p>
+<h3 id="8-内存分配"><a href="#8-内存分配" class="headerlink" title="8. 内存分配"></a>8. 内存分配</h3><p>内存分配<br>先说一下给对象 object 分配内存的主要流程：</p>
+<ol>
+<li>object size &gt; 32K，则使用 mheap 直接分配。</li>
+<li>object size &gt; 16 byte &amp;&amp; size &lt;=32K byte 时，先使用 mcache 中对应的 size class 分配。</li>
+<li>object size &lt; 16 byte，使用 mcache 的小对象分配器 tiny 直接分配。（其实 tiny 就是一个指针，暂且这么说吧。）</li>
+<li>如果 mcache 对应的 size class 的 span 已经没有可用的块，则向 mcentral 请求。</li>
+<li>如果 mcentral 也没有可用的块，则向 mheap 申请，并切分。</li>
+<li>如果 mheap 也没有合适的 span，则想操作系统申请。</li>
+</ol>
 <h3 id="8-相关资料"><a href="#8-相关资料" class="headerlink" title="8. 相关资料"></a>8. 相关资料</h3><ul>
 <li>也谈goroutine调度器：<a href="https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/" target="_blank" rel="noopener">https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/</a></li>
 <li>Go 语言设计与实现：<a href="https://draveness.me/golang/" target="_blank" rel="noopener">https://draveness.me/golang/</a> ，直接解读runtime源码</li>
@@ -406,6 +603,13 @@
 
               <time title="Created: 2020-08-18 15:32:44" itemprop="dateCreated datePublished" datetime="2020-08-18T15:32:44+08:00">2020-08-18</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-09-01 15:32:44" itemprop="dateModified" datetime="2020-09-01T15:32:44+08:00">2020-09-01</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -481,7 +685,7 @@
 <li><p>ziplist，同样是为了降低内存占用，只有元素较小（&lt;64字节）、较少(&lt;128个)时使用</p>
 </li>
 </ul>
-<h3 id="过期淘汰策略"><a href="#过期淘汰策略" class="headerlink" title="过期淘汰策略"></a>过期淘汰策略</h3><ol>
+<h3 id="Expire的过期淘汰策略"><a href="#Expire的过期淘汰策略" class="headerlink" title="Expire的过期淘汰策略"></a>Expire的过期淘汰策略</h3><ol>
 <li><p>定时删除：<br>在设置键过期时间的同时，创建定时器timer，到期后，立刻删除该键。<br>定时删除策略，对内存最友好，对CPU最不友好，处理大量的timer，也会占用很多CPU。</p>
 </li>
 <li><p>惰性删除：<br>redis在访问键的时候，检查过期时间。<br>对CPU最友好，但是对内存不友好。如果一个键过期后，不再访问到，将一直占用内存。</p>
@@ -489,7 +693,7 @@
 <li><p>定期删除：<br>每隔一段时间，对redis进行一次检查，删除里面的过期键。  </p>
 </li>
 </ol>
-<p><strong>需要合理设置触发频率和执行时长。</strong></p>
+<p><strong>需要合理设置触发频率和执行时长。</strong>  </p>
 <p>redis同时使用惰性删除和定期删除两种策略。</p>
 <h3 id="哨兵Sentinel"><a href="#哨兵Sentinel" class="headerlink" title="哨兵Sentinel"></a>哨兵Sentinel</h3><ol>
 <li>哨兵是redis高可用的一个方案。可以用来监视redis主从集群的运行状况，及时替换故障节点。<br>sentinel也可以有多个，形成集群，共同监视redis集群。  </li>
@@ -505,23 +709,42 @@
 <li>重新分片，类似rehash的过程，不过这个是批量的，而非渐进式的。迁移过程中的查询过程与rehash过程类似。</li>
 </ol>
 <h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ol>
-<li>共享对象：对于整数型的数据，redis可以在不同kv间共享，来减少内存使用。对字符串不共享，因为字符串的比较复杂度是O(N)，而数字是O(1)。</li>
-<li>redis使用引用计数来回收内存，不用担心循环引用，因为引用关系简单</li>
-<li>主从模式下，过期键的删除由主机控制，从机不会主动删除过期键，而会等待主机删除时发过来的DEL命令控制。造成的问题是，如果键过期，主机未删除，在从机还会正常读到。</li>
-<li>如果一个主机有多个从机，那么当主机故障时，多个从机会选举出一个主机，选举算法同样基于raft。</li>
-<li>redis有个周期函数，每100ms执行一次，来对正在运行的服务器进行维护。比如：执行定期删除策略、检查是否满足save条件等。</li>
-<li>RDB文件是二进制格式，会对KV进行压缩，存储KV的时候，大致是Type-Key-Value的形式。</li>
-<li>AOF包含的只有写命令。为了解决AOF文件体积膨胀的问题，可以执行AOF重写操作。在执行BGREWRITEAOF命令时，redis会维护一个AOF重写缓冲区，记录执行期间的所有写命令。子进程重写完原有AOF文件后，再将缓冲区的内容，追加到新的AOF文件末尾，解决重写AOF期间的命令丢失问题。</li>
-<li>redis的复制：关键点在于同步和命令传播。同步是在从机启动时，直接将主机的RDB文件拉过来；同步成功后，会进入命令传播阶段，主机会将每一个写命令同步给从机。2.8版本以前，即使命令在传播过程中丢失，主、从都不会注意到，也不会重传。2.8版本及以后，增加了offset的概念，来实现部分同步和命令重传。</li>
-<li>当前的redis订阅&amp;消费模式，不会保存消息，如果publish时，subscriber不在线，将错过这条消息。更没有对消息持久化的操作。简单地理解，消息只会发送给当时在线的消费者。</li>
-<li>multi vs pipeline：<ul>
+<li><p>共享对象：对于整数型的数据，redis可以在不同kv间共享，来减少内存使用。对字符串不共享，因为字符串的比较复杂度是O(N)，而数字是O(1)。</p>
+</li>
+<li><p>redis使用引用计数来回收内存，不用担心循环引用，因为引用关系简单</p>
+</li>
+<li><p>主从模式下，过期键的删除由主机控制，从机不会主动删除过期键，而会等待主机删除时发过来的DEL命令控制。造成的问题是，如果键过期，主机未删除，在从机还会正常读到。</p>
+</li>
+<li><p>主从同步过程：  </p>
+<ul>
+<li>master 执行bgsave 备份rdb镜像，并同时将后续修改操作记录到内存buffer</li>
+<li>master备份完成后，先将rdb文件传输给slave</li>
+<li>slave将rdb镜像加载到内存，之后重放master备份期间的修改即可</li>
+</ul>
+</li>
+<li><p>如果一个主机有多个从机，那么当主机故障时，多个从机会选举出一个主机，选举算法同样基于raft。</p>
+</li>
+<li><p>redis有个周期函数，每100ms执行一次，来对正在运行的服务器进行维护。比如：执行定期删除策略、检查是否满足save条件等。</p>
+</li>
+<li><p>RDB文件是二进制格式，会对KV进行压缩，存储KV的时候，大致是Type-Key-Value的形式。</p>
+</li>
+<li><p>AOF包含的只有写命令。为了解决AOF文件体积膨胀的问题，可以执行AOF重写操作。在执行BGREWRITEAOF命令时，redis会维护一个AOF重写缓冲区，记录执行期间的所有写命令。子进程重写AOF完成后，再将缓冲区的内容，追加到新的AOF文件末尾，解决重写AOF期间的命令丢失问题。</p>
+</li>
+<li><p>redis的复制：关键点在于同步和命令传播。同步是在从机启动时，直接将主机的RDB文件拉过来；同步成功后，会进入命令传播阶段，主机会将每一个写命令同步给从机。2.8版本以前，即使命令在传播过程中丢失，主、从都不会注意到，也不会重传。2.8版本及以后，增加了offset的概念，来实现部分同步和命令重传。</p>
+</li>
+<li><p>当前的redis订阅&amp;消费模式，不会保存消息，如果publish时，subscriber不在线，将错过这条消息。更没有对消息持久化的操作。简单地理解，消息只会发送给当时在线的消费者。</p>
+</li>
+<li><p>multi vs pipeline：</p>
+<ul>
 <li>multi命令缓冲在server，pipeline缓冲在client</li>
 <li>multi，每个命令client会发送一次，pipeline是一次发送积累的多个命令</li>
 <li>multi/exec可以保证多个命令的执行在一个原子操作中，不被其他client的命令打断，pipeline不保证</li>
 </ul>
 </li>
-<li>WATCH命令，在exec时，检查watched keys，如果value发生了变化，就拒绝执行</li>
-<li>redis事务和传统RDBMS事务，最大的区别在于，redis不支持回滚，即使事务队列的某个命令执行期间出错，整个事务也会继续执行剩下的命令。因此可以说，不满足原子性，要么全部成功，要么全部失败。对于C一致性、I隔离性、D持久性，redis是可以满足的。</li>
+<li><p>WATCH命令，在exec时，检查watched keys，如果value发生了变化，就拒绝执行</p>
+</li>
+<li><p>redis事务和传统RDBMS事务，最大的区别在于，redis不支持回滚，即使事务队列的某个命令执行期间出错，整个事务也会继续执行剩下的命令。因此可以说，不满足原子性的要求：要么全部成功，要么全部失败。对于C一致性、I隔离性、D持久性，redis是可以满足的。</p>
+</li>
 </ol>
 
       
@@ -1005,136 +1228,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/22/%E5%89%91%E6%8C%87offer%E9%A2%98%E7%9B%AE%E6%80%9D%E8%B7%AF%E7%AE%80%E7%BB%93-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/avatar.png">
-      <meta itemprop="name" content="WordGe">
-      <meta itemprop="description" content="厉害了~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小本本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/06/22/%E5%89%91%E6%8C%87offer%E9%A2%98%E7%9B%AE%E6%80%9D%E8%B7%AF%E7%AE%80%E7%BB%93-1/" class="post-title-link" itemprop="url">剑指offer题目思路简结-1</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-06-22 14:54:13" itemprop="dateCreated datePublished" datetime="2020-06-22T14:54:13+08:00">2020-06-22</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>剑指offer 1-23 题，思路简结</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/06/22/%E5%89%91%E6%8C%87offer%E9%A2%98%E7%9B%AE%E6%80%9D%E8%B7%AF%E7%AE%80%E7%BB%93-1/">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/11/%E4%BA%BA%E7%94%9F%E7%9A%84%E4%B8%80%E4%BA%9B%E5%A4%A7%E9%81%93%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/avatar.png">
-      <meta itemprop="name" content="WordGe">
-      <meta itemprop="description" content="厉害了~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小本本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/06/11/%E4%BA%BA%E7%94%9F%E7%9A%84%E4%B8%80%E4%BA%9B%E5%A4%A7%E9%81%93%E7%90%86/" class="post-title-link" itemprop="url">人生的一些大道理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-06-11 16:25:13" itemprop="dateCreated datePublished" datetime="2020-06-11T16:25:13+08:00">2020-06-11</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>李笑来传话筒。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/06/11/%E4%BA%BA%E7%94%9F%E7%9A%84%E4%B8%80%E4%BA%9B%E5%A4%A7%E9%81%93%E7%90%86/">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1206,7 +1299,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
